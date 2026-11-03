@@ -1,0 +1,43 @@
+.main.index {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .preface {
+        margin-bottom: 1rem;
+    }
+
+    .cover-img-randomizer {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .image {
+            width: 15rem;
+            height: 15rem;
+            background-color: gray;
+            margin-bottom: 0.5rem;
+        }
+
+        .description {
+            font-size: 0.8rem;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+
+        .read-more {
+            font-style: normal;
+        }
+
+        .roll {
+            padding: 0.125rem 0.5rem;
+        }
+    }
+
+    .intro {
+        margin-bottom: 2rem;
+    }
+}

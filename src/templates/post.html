@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% set main_class = "post" %}
+
+{% block head %}
+<link rel="stylesheet" href="/assets/css/post.css">
+<script defer src="/assets/js/post.js"></script>
+{% endblock %}
+
+{% block main %}
+{{ post_html }}
+{% endblock %}

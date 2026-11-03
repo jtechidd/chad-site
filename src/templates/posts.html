@@ -1,0 +1,25 @@
+{% import "macros.html" as macros %}
+
+{% extends "base.html" %}
+{% set main_class = "posts" %}
+
+{% block head %}
+<link rel="stylesheet" href="/assets/css/posts.css">
+<script defer src="/assets/js/posts.js"></script>
+{% endblock %}
+
+{% block main %}
+{% include "_header.html" %}
+{% include "_navbar.html" %}
+<hr>
+{{ macros.sub_header("latest posts") }}
+{% for post in posts %}
+<div class="post-card">
+    <div class="title">{{ post.title }}</div>
+    <div class="abstract">{{ post.abstract }}</div>
+</div>
+{% endfor %}
+<a href="#top" class="back-to-top">back to top</a>
+<hr>
+{% include "_footer.html" %}
+{% endblock %}
