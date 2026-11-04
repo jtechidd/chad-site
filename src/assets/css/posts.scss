@@ -1,28 +1,63 @@
+@import "./mixins.scss";
+
 .main.posts {
     .post-card {
         margin-bottom: 2rem;
+        height: 6rem;
 
-        .title {
-            font-weight: bold;
+        .link {
+            display: block;
+            text-decoration: none;
+            height: 100%;
 
-            margin-bottom: 0.5rem;
-        }
+            .layout {
+                display: flex;
+                flex-direction: row;
+                gap: 0.5rem;
+                height: 100%;
 
-        .abstract {
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+                .text {
+                    display: flex;
+                    flex-direction: column;
+                    flex: 0 1 auto;
 
-            line-clamp: 3;
-            -webkit-line-clamp: 3;
+                    .top {
+                        flex: 1 1 auto;
 
-            font-size: 1rem;
+                        .title {
+                            text-decoration: underline;
+                        }
+
+                        .subtitle {
+                            font-size: 0.8rem;
+                            color: dimgray;
+                        }
+                    }
+
+                    .bottom {
+                        flex: 0 1 auto;
+                        overflow: hidden;
+
+                        .abstract {
+                            color: black;
+                            display: -webkit-box;
+                            -webkit-box-orient: vertical;
+                            overflow: hidden;
+                            line-clamp: 2;
+                            -webkit-line-clamp: 2;
+                            font-size: 0.9rem;
+                        }
+                    }
+                }
+
+                .thumbnail {
+                    flex: 0 0 8rem;
+                    display: block;
+                    background-color: gray;
+                    object-fit: cover;
+                    height: 100%;
+                }
+            }
         }
     }
-
-    .back-to-top {
-        display: block;
-        text-align: center;
-    }
-
 }

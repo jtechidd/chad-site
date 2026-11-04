@@ -1,3 +1,36 @@
-{% macro sub_header(text) %}
-<h3 class="sub-header">{{ text }}</h3>
+{% macro site_header() %}
+<div class="site-header">
+    <a class="link" href="/">
+        <img class="logo" src="/assets/images/logo.png">
+    </a>
+</div>
+{% endmacro %}
+
+{% macro page_sub_header(text) %}
+<h3 class="page-sub-header">{{ text }}</h3>
+{% endmacro %}
+
+{% macro navbar() %}
+<ul class="nav">
+    <li class="item"><a href="/">home</a></li>
+    <li class="item"><a href="/about">about</a></li>
+    <li class="item"><a href="/posts">posts</a></li>
+    <li class="item"><a href="/albums">albums</a></li>
+</ul>
+{% endmacro %}
+
+{% macro site_footer() %}
+<div class="site-footer">
+    © {{ current_year }} | windriftz | all rights reserved
+</div>
+{% endmacro %}
+
+{% macro back_to_top() %}
+<div class="win98 back-to-top">
+    <a href="#top" class="link">
+        <button class="button">
+            back to top
+        </button>
+    </a>
+</div>
 {% endmacro %}

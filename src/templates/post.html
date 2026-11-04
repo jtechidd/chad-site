@@ -1,3 +1,5 @@
+{% import "macros.html" as macros with context %}
+
 {% extends "base.html" %}
 {% set main_class = "post" %}
 
@@ -7,5 +9,11 @@
 {% endblock %}
 
 {% block main %}
+{{ macros.navbar() }}
+<hr>
+<h2 class="title">{{ title }}</h2>
+<div class="subtitle">{{ date_fmt }}</div>
 {{ post_html }}
+{{ macros.back_to_top() }}
+<hr>
 {% endblock %}

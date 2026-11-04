@@ -1,3 +1,5 @@
+@import "./mixins.scss";
+
 .main.index {
     text-align: center;
     display: flex;
@@ -33,7 +35,8 @@
         }
 
         .roll {
-            padding: 0.125rem 0.5rem;
+            @include win98-btn-fix;
+            padding: 0.25rem 0.5rem;
         }
     }
 

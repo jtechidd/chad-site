@@ -1,11 +1,17 @@
+import argparse
 import shutil
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
 import frontmatter
 import mistune
 import sass
+from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader
+from loguru import logger
+
+load_dotenv()
 
 current_dir = Path(__file__).resolve().parent
 
@@ -24,8 +30,10 @@ dist_assets_images_dir = dist_assets_dir.joinpath("images")
 dist_assets_js_dir = dist_assets_dir.joinpath("js")
 dist_posts_dir = dist_dir.joinpath("posts")
 
+cf_page_proj = "chad-site"
 
-def main():
+
+def build(args):
     base_context = {"current_year": datetime.now().year}
     dist_dir.mkdir(parents=True, exist_ok=True)
     jj2_env = Environment(loader=FileSystemLoader(templates_dir))
@@ -45,17 +53,23 @@ def main():
         dist_post_dir = dist_posts_dir.joinpath(slug)
         dist_post_dir.mkdir(parents=True, exist_ok=True)
         html = markdown(post.content)
+        abstract = " ".join(post.content.split())
+        if "description" in post:
+            abstract = post["description"]
+        post["abstract"] = abstract
+        post["date_fmt"] = post["date"].strftime("%b %d, %Y")
         with open(
             dist_post_dir.joinpath("index.html"),
             mode="w",
             encoding="utf-8",
         ) as post_html:
-            context = {**base_context, "post_html": html}
+            context = {
+                **base_context,
+                **post,
+                "post_html": html,
+                "page_title": post["title"],
+            }
             post_html.write(post_tpl.render(context))
-        abstract = " ".join(post.content.split())
-        if "description" in post:
-            abstract = post["description"]
-        post["abstract"] = abstract
         posts.append(post)
 
     posts_tpl = jj2_env.get_template("posts.html")
@@ -70,5 +84,40 @@ def main():
     shutil.copytree(assets_js_dir, dist_assets_js_dir, dirs_exist_ok=True)
 
 
+def deploy(args):
+    if not dist_dir.is_dir():
+        logger.error("dist directory does not exist, run build first.")
+        return
+    if shutil.which("wrangler") is not None:
+        logger.info("wrangler found, using it.")
+        try:
+            cmd = [
+                "wrangler",
+                "pages",
+                "deploy",
+                dist_dir,
+                f"--project-name={cf_page_proj}",
+                "--commit-dirty=true",
+            ]
+            result = subprocess.run(cmd, check=True)
+            logger.info(
+                "wrangler deploy complete with returncode {}.", result.returncode
+            )
+            return result.returncode
+        except subprocess.CalledProcessError as e:
+            return e.returncode
+    else:
+        logger.info("wrangler not found, falling back to cloudflare SDK deploy.")
+
+
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command")
+    build_parser = subparsers.add_parser("build")
+    build_parser.set_defaults(func=build)
+
+    deploy_parser = subparsers.add_parser("deploy")
+    deploy_parser.set_defaults(func=deploy)
+
+    args = parser.parse_args()
+    args.func(args)

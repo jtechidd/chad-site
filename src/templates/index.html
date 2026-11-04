@@ -1,5 +1,8 @@
+{% import "macros.html" as macros with context %}
+
 {% extends "base.html" %}
 {% set main_class = "index" %}
+{% set page_title = "home" %}
 
 {% block head %}
 <link rel="stylesheet" href="/assets/css/index.css">
@@ -7,17 +10,19 @@
 {% endblock %}
 
 {% block main %}
-{% include "_header.html" %}
 <div class="preface">
     dumbass website in big {{ current_year }}<br>
     100% human made, safe to consume.
 </div>
-{% include "_navbar.html" %}
+{{ macros.navbar() }}
 <div class="cover-img-randomizer">
     <img class="image">
     <div class="description">gold fish pond at my home, they are such cuties.
-        <a href="" class="read-more">read more</a></div>
-    <button id="roll" class="roll" title="Randomize the cover image, they are obtained from posts">🎲 roll</a>
+        <a href="" class="read-more">read more</a>
+    </div>
+    <div class="win98">
+        <button id="roll" class="roll" title="Randomize the cover image, they are obtained from posts">🎲 roll</a>
+    </div>
 </div>
 <div class="intro">
     it's me talking about computing, electronics,<br>
@@ -28,5 +33,4 @@
     stay hydrated :),<br>
     enjoy!
 </div>
-{% include "_footer.html" %}
 {% endblock %}
