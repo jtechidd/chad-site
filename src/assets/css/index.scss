@@ -2,9 +2,6 @@
 
 .main.index {
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 
     .preface {
         margin-bottom: 1rem;
@@ -14,29 +11,41 @@
         margin-top: 2rem;
         margin-bottom: 2rem;
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        flex-direction: row;
+        justify-content: center;
 
-        .image {
-            width: 15rem;
-            height: 15rem;
-            background-color: gray;
-            margin-bottom: 0.5rem;
-        }
+        .window {
+            flex: 0 1 16rem;
+            min-width: 0;
 
-        .description {
-            font-size: 0.8rem;
-            font-style: italic;
-            margin-bottom: 0.5rem;
-        }
+            .title-bar-text {
+                font-size: 0.8rem;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
 
-        .read-more {
-            font-style: normal;
-        }
+            .image {
+                height: 16rem;
+                background-color: gray;
+                margin-bottom: 0.5rem;
+                width: 100%;
+            }
 
-        .roll {
-            @include win98-btn-fix;
-            padding: 0.25rem 0.5rem;
+            .description {
+                font-size: 0.8rem;
+                font-style: italic;
+                margin-bottom: 0.5rem;
+            }
+
+            .read-more {
+                font-style: normal;
+            }
+
+            .roll {
+                @include win98-btn-fix;
+                padding: 0.25rem 0.5rem;
+            }
         }
     }
 

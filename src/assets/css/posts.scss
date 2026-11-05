@@ -19,23 +19,32 @@
                 .text {
                     display: flex;
                     flex-direction: column;
-                    flex: 0 1 auto;
+                    flex: 1 1 0;
+                    min-width: 0;
 
                     .top {
                         flex: 1 1 auto;
+                        min-height: 0;
 
                         .title {
                             text-decoration: underline;
+                            overflow: hidden;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
                         }
 
                         .subtitle {
                             font-size: 0.8rem;
                             color: dimgray;
+                            overflow: hidden;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
                         }
                     }
 
                     .bottom {
                         flex: 0 1 auto;
+                        min-height: 0;
                         overflow: hidden;
 
                         .abstract {
@@ -56,6 +65,10 @@
                     background-color: gray;
                     object-fit: cover;
                     height: 100%;
+
+                    @media (max-width: 512px) {
+                        display: none;
+                    }
                 }
             }
         }
