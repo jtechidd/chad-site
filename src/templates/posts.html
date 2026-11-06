@@ -14,24 +14,22 @@
 <hr>
 {{ macros.page_sub_header("latest posts") }}
 {% for post in posts %}
-<div class="post-card">
-    <a class="link" href="/posts/{{ post.slug }}">
-        <div class="layout">
-            <div class="text">
-                <div class="top">
-                    <div class="title">{{ post.title }}</div>
-                    <div class="subtitle">{{ post.date_fmt }}</div>
-                </div>
-                <div class="bottom">
-                    <div class="abstract">{{ post.abstract }}</div>
-                </div>
+<a class="post-card" href="/posts/{{ post.slug }}">
+    <div class="layout">
+        <div class="text">
+            <div class="top">
+                <div class="title">{{ post.title }}</div>
+                <div class="subtitle">{{ post.date_fmt }}</div>
             </div>
-            {% if post.thumbnail %}
-            <img class="thumbnail" src="{{ post.thumbnail }}">
-            {% endif %}
+            <div class="bottom">
+                <div class="abstract">{{ post.abstract }}</div>
+            </div>
         </div>
-    </a>
-</div>
+        {% if post.thumbnail %}
+        <img class="thumbnail" src="{{ post.thumbnail }}">
+        {% endif %}
+    </div>
+</a>
 {% endfor %}
 {{ macros.back_to_top() }}
 <hr>

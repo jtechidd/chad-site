@@ -32,24 +32,24 @@ dist_posts_dir = dist_dir.joinpath("posts")
 
 cf_page_proj = "chad-site"
 
+featured_post_slugs = ["01-welcome-to-site"]
+
 
 def build(args):
     base_context = {"current_year": datetime.now().year}
     dist_dir.mkdir(parents=True, exist_ok=True)
     jj2_env = Environment(loader=FileSystemLoader(templates_dir))
-    index_tpl = jj2_env.get_template("index.html")
-    with open(
-        dist_dir.joinpath("index.html"), mode="w", encoding="utf-8"
-    ) as index_html:
-        index_html.write(index_tpl.render(base_context))
 
     dist_posts_dir.mkdir(parents=True, exist_ok=True)
     markdown = mistune.create_markdown()
     post_tpl = jj2_env.get_template("post.html")
     posts = []
+    posts_map = {}
     for file in posts_dir.iterdir():
         post = frontmatter.load(file)
         slug = post["slug"]
+        order = int(slug.split("-")[0])
+        post["order"] = order
         dist_post_dir = dist_posts_dir.joinpath(slug)
         dist_post_dir.mkdir(parents=True, exist_ok=True)
         html = markdown(post.content)
@@ -71,13 +71,26 @@ def build(args):
             }
             post_html.write(post_tpl.render(context))
         posts.append(post)
+        posts_map[slug] = post
+
+    sorted_posts = sorted(posts, key=lambda p: (-p["order"], -p["date"].toordinal()))
 
     posts_tpl = jj2_env.get_template("posts.html")
     with open(
         dist_posts_dir.joinpath("index.html"), mode="w", encoding="utf-8"
     ) as posts_html:
-        context = {**base_context, "posts": posts}
+        context = {**base_context, "posts": sorted_posts}
         posts_html.write(posts_tpl.render(context))
+
+    featured_posts = [posts_map[slug] for slug in featured_post_slugs]
+
+    index_tpl = jj2_env.get_template("index.html")
+    with open(
+        dist_dir.joinpath("index.html"), mode="w", encoding="utf-8"
+    ) as index_html:
+        index_html.write(
+            index_tpl.render({**base_context, "featured_posts": featured_posts})
+        )
 
     sass.compile(dirname=(assets_css_dir, dist_assets_css_dir))
     shutil.copytree(assets_images_dir, dist_assets_images_dir, dirs_exist_ok=True)

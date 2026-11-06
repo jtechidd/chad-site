@@ -19,8 +19,6 @@ body {
         min-width: 0;
 
         .site-header {
-            font-weight: bold;
-            text-align: center;
             display: flex;
             flex-direction: row;
             justify-content: center;
@@ -28,9 +26,6 @@ body {
             .link {
                 flex: 0 1 12rem;
                 min-width: 0;
-
-                display: block;
-                @include link-remove-text-effect;
 
                 .logo {
                     width: 100%;
@@ -60,11 +55,6 @@ body {
             .link {
                 display: inline-block;
                 @include link-remove-text-effect;
-
-                .button {
-                    @include win98-btn-fix;
-                    padding: 0.5rem;
-                }
             }
         }
 
@@ -77,6 +67,19 @@ body {
     .win98 {
         * {
             font-family: Arial, Helvetica, sans-serif;
+            -webkit-font-smoothing: unset;
+            font-size: 0.8rem;
+        }
+
+        button {
+            color: inherit;
+            text-shadow: none;
+            cursor: pointer;
+            padding: 0.5rem;
+
+            &:not(&:disabled):active {
+                text-shadow: none;
+            }
         }
     }
 }

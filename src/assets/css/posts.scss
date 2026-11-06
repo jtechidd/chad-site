@@ -2,73 +2,68 @@
 
 .main.posts {
     .post-card {
+        display: block;
+        text-decoration: none;
         margin-bottom: 2rem;
         height: 6rem;
 
-        .link {
-            display: block;
-            text-decoration: none;
+        .layout {
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
             height: 100%;
 
-            .layout {
+            .text {
                 display: flex;
-                flex-direction: row;
-                gap: 0.5rem;
-                height: 100%;
+                flex-direction: column;
+                flex: 1 1 0;
+                min-width: 0;
 
-                .text {
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1 1 0;
-                    min-width: 0;
+                .top {
+                    flex: 1 1 auto;
+                    min-height: 0;
 
-                    .top {
-                        flex: 1 1 auto;
-                        min-height: 0;
-
-                        .title {
-                            text-decoration: underline;
-                            overflow: hidden;
-                            white-space: nowrap;
-                            text-overflow: ellipsis;
-                        }
-
-                        .subtitle {
-                            font-size: 0.8rem;
-                            color: dimgray;
-                            overflow: hidden;
-                            white-space: nowrap;
-                            text-overflow: ellipsis;
-                        }
+                    .title {
+                        text-decoration: underline;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
                     }
 
-                    .bottom {
-                        flex: 0 1 auto;
-                        min-height: 0;
+                    .subtitle {
+                        font-size: 0.8rem;
+                        color: dimgray;
                         overflow: hidden;
-
-                        .abstract {
-                            color: black;
-                            display: -webkit-box;
-                            -webkit-box-orient: vertical;
-                            overflow: hidden;
-                            line-clamp: 2;
-                            -webkit-line-clamp: 2;
-                            font-size: 0.9rem;
-                        }
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
                     }
                 }
 
-                .thumbnail {
-                    flex: 0 0 8rem;
-                    display: block;
-                    background-color: gray;
-                    object-fit: cover;
-                    height: 100%;
+                .bottom {
+                    flex: 0 1 auto;
+                    min-height: 0;
+                    overflow: hidden;
 
-                    @media (max-width: 512px) {
-                        display: none;
+                    .abstract {
+                        color: black;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                        line-clamp: 2;
+                        -webkit-line-clamp: 2;
                     }
+                }
+            }
+
+            .thumbnail {
+                flex: 0 0 8rem;
+                display: block;
+                background-color: gray;
+                object-fit: cover;
+                height: 100%;
+
+                @media (max-width: 512px) {
+                    display: none;
                 }
             }
         }

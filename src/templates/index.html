@@ -11,7 +11,7 @@
 
 {% block main %}
 <div class="preface">
-    dumbass website in big {{ current_year }}<br>
+    welcome to windriftz.com's homepage<br>
     100% human made, safe to consume.
 </div>
 {{ macros.navbar() }}
@@ -28,19 +28,56 @@
             <div class="description">gold fish pond at my home, they are such cuties.
                 <a href="" class="read-more">read more</a>
             </div>
-            <button id="roll" class="roll"
-                title="Randomize the cover image, they are obtained from posts">🎲roll</button>
+            <div class="buttons">
+                <button id="roll" class="roll"
+                    title="Randomize the cover image, they are obtained from posts">🎲 roll</button>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="intro">
-    it's me talking about computing, electronics,<br>
-    stupid hacking, and criticism on technologies.<br>
-    also enjoy hobbies just to cure my rotten brain and attention span. <br>
-    .<br>
-    .<br>
-    stay hydrated :),<br>
-    enjoy!
+<div class="content">
+    <div class="left">
+        <div class="section paragraph">
+            <h4 class="header">what to do here?</h4>
+            check out my <a href="/posts">latest posts</a> to read about my stories, they cover a broad range from techy
+            stuff to my daily life. all the content come from real human, not AI generated.<br>.<br>
+            stay hydrated and enjoy! :).<br>.<br>
+            want to donate or become my supporter? <a href="">buy me a coffee</a>.<br>
+            <a href="">hire me</a>, as a developer with experienced coding, doing creative things.
+        </div>
+        <hr>
+        <div class="section get-in-touch">
+            <h4 class="header">get in touch</h4>
+            <div>
+                want to say hi? you can contact me directly through this <a
+                    href="mailto:w1ndriftz@gmail.com">email</a>.<br>
+                be careful for your sensitive information.
+            </div>
+        </div>
+    </div>
+    <div class="right">
+        <div class="section featured-posts">
+            <h4 class="header">featured posts</h4>
+            {% for post in featured_posts %}
+            <a class="link" href="/posts/{{ post.slug }}">
+                <div class="title">{{ post.title }}</div>
+                <div class="subtitle">{{ post.short_description }}</div>
+            </a>
+            {% endfor %}
+        </div>
+        <hr>
+        <div class="section platforms">
+            <h4 class="header">platforms</h4>
+            <ul class="list">
+                <li class="item"><a class="link" href="">github</a></li>
+                <li class="item"><a class="link" href="">youtube</a></li>
+                <li class="item"><a class="link" href="">instagram</a></li>
+                <li class="item"><a class="link" href="">bluesky</a></li>
+                <li class="item"><a class="link" href="">substack</a></li>
+                <li class="item"><a class="link" href="">mastodon</a></li>
+            </ul>
+        </div>
+    </div>
 </div>
 {% endblock %}
