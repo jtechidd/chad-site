@@ -13,7 +13,9 @@
 <hr>
 <h2 class="title">{{ title }}</h2>
 <div class="subtitle">{{ date_fmt }}</div>
-{{ post_html }}
+<div class="content">
+    {{ post_html }}
+</div>
 {{ macros.back_to_top() }}
 <hr>
 {% endblock %}
