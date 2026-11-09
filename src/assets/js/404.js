@@ -1,0 +1,1 @@
+document.querySelector("#requested-link").setAttribute("href",window.location.href);

@@ -1,0 +1,24 @@
+{% import "macros.html" as macros with context %}
+
+{% extends "base.html" %}
+{% set main_class = "not-found" %}
+{% set page_title = "not found" %}
+
+{% block head %}
+<link rel="stylesheet" href="/assets/css/posts.css">
+<script defer src="/assets/js/404.js"></script>
+{% endblock %}
+
+{% block main %}
+{{ macros.navbar() }}
+<hr>
+<h2><a href="https://en.wikipedia.org/wiki/HTTP_404">404 error</a>: file not found</h2>
+the <a id="requested-link" href="">url</a> you requested was not found.<br>
+maybe you would like to look at:<br>
+<ul>
+    <li>
+        <a href="/">the main page</a>
+    </li>
+</ul>
+<hr>
+{% endblock %}

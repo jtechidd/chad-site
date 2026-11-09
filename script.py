@@ -2,6 +2,7 @@ import argparse
 import json
 import shutil
 import subprocess
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 
@@ -38,6 +39,30 @@ cf_page_proj = "chad-site"
 
 featured_post_slugs = ["01-welcome-to-site"]
 
+jj2_env = Environment(loader=FileSystemLoader(templates_dir))
+
+
+class NoGivenTemplateException(Exception):
+    pass
+
+
+@contextmanager
+def ensure_dir_and_open_file(path):
+    parent = path.parent
+    parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as file:
+        yield file
+
+
+def build_page(dest_path, template_path=None, template=None, context=None):
+    if not template_path and not template:
+        raise NoGivenTemplateException()
+    if template_path:
+        template = jj2_env.get_template(template_path)
+    with ensure_dir_and_open_file(dest_path) as file:
+        rendered = template.render() if context is None else template.render(context)
+        file.write(rendered)
+
 
 def walk_ast(ctx, element):
     if isinstance(element, Image):
@@ -65,10 +90,7 @@ class MyHTMLRenderer(HTMLRenderer):
 
 def build(args):
     base_context = {"current_year": datetime.now().year}
-    dist_dir.mkdir(parents=True, exist_ok=True)
-    jj2_env = Environment(loader=FileSystemLoader(templates_dir))
 
-    dist_posts_dir.mkdir(parents=True, exist_ok=True)
     parser = Parser()
     renderer = MyHTMLRenderer()
     post_tpl = jj2_env.get_template("post.html")
@@ -77,6 +99,8 @@ def build(args):
     images = []
     for file in posts_dir.iterdir():
         post = frontmatter.load(file)
+        if post["draft"]:
+            continue
         slug = post["slug"]
         order = None
         try:
@@ -88,7 +112,6 @@ def build(args):
             continue
         post["order"] = order
         dist_post_dir = dist_posts_dir.joinpath(slug)
-        dist_post_dir.mkdir(parents=True, exist_ok=True)
         ast = parser.parse(post.content)
         walk_ast_ctx = {"page_url": f"/posts/{slug}", "images": []}
         walk_ast(walk_ast_ctx, ast)
@@ -99,45 +122,42 @@ def build(args):
             abstract = post["description"]
         post["abstract"] = abstract
         post["date_fmt"] = post["date"].strftime("%b %d, %Y")
-        with open(
+        build_page(
             dist_post_dir.joinpath("index.html"),
-            mode="w",
-            encoding="utf-8",
-        ) as post_html:
-            context = {
+            template=post_tpl,
+            context={
                 **base_context,
                 **post,
                 "post_html": html,
                 "page_title": post["title"],
-            }
-            post_html.write(post_tpl.render(context))
+            },
+        )
         posts.append(post)
         posts_map[slug] = post
 
     sorted_posts = sorted(posts, key=lambda p: (-p["order"], -p["date"].toordinal()))
 
-    posts_tpl = jj2_env.get_template("posts.html")
-    with open(
-        dist_posts_dir.joinpath("index.html"), mode="w", encoding="utf-8"
-    ) as posts_html:
-        context = {**base_context, "posts": sorted_posts}
-        posts_html.write(posts_tpl.render(context))
+    build_page(
+        dist_posts_dir.joinpath("index.html"),
+        template_path="posts.html",
+        context={**base_context, "posts": sorted_posts},
+    )
 
     featured_posts = [posts_map[slug] for slug in featured_post_slugs]
 
-    index_tpl = jj2_env.get_template("index.html")
-    with open(
-        dist_dir.joinpath("index.html"), mode="w", encoding="utf-8"
-    ) as index_html:
-        index_html.write(
-            index_tpl.render({**base_context, "featured_posts": featured_posts})
-        )
+    build_page(
+        dist_dir.joinpath("index.html"),
+        template_path="index.html",
+        context={**base_context, "featured_posts": featured_posts},
+    )
 
-    dist_assets_data_dir.mkdir(parents=True, exist_ok=True)
-    with open(
-        dist_assets_data_dir.joinpath("images.json"), "w", encoding="utf-8"
-    ) as images_json:
-        images_json.write(json.dumps(images))
+    build_page(
+        dist_dir.joinpath("404.html"),
+        template_path="404.html",
+    )
+
+    with ensure_dir_and_open_file(dist_assets_data_dir.joinpath("images.json")) as file:
+        file.write(json.dumps(images))
 
     sass.compile(dirname=(assets_css_dir, dist_assets_css_dir))
     shutil.copytree(assets_images_dir, dist_assets_images_dir, dirs_exist_ok=True)

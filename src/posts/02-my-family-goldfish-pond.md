@@ -3,7 +3,7 @@ title: My family goldfish pond
 slug: 02-my-family-goldfish-pond
 date: 2026-11-04
 tags: []
-draft: false
+draft: true
 thumbnail: https://picsum.photos/200/300
 short_description: Raising forbidden ponyos
 ---
