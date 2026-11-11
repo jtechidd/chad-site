@@ -83,6 +83,17 @@
                     margin-bottom: 0.5rem;
                     text-decoration: none;
 
+                    &:hover {
+
+                        .title,
+                        .subtitle {
+                            overflow: visible;
+                            text-overflow: unset;
+                        }
+
+                    }
+
+
                     .title {
                         text-decoration: underline;
                         overflow: hidden;

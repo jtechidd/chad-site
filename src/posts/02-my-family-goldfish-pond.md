@@ -1,6 +1,5 @@
 ---
 title: My family goldfish pond
-slug: 02-my-family-goldfish-pond
 date: 2026-11-04
 tags: []
 draft: true

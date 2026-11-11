@@ -11,8 +11,9 @@ import sass
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader
 from loguru import logger
+from marko.block import BlockElement
 from marko.html_renderer import HTMLRenderer
-from marko.inline import Image
+from marko.inline import Image, RawText
 from marko.parser import Parser
 
 load_dotenv()
@@ -35,14 +36,47 @@ dist_assets_js_dir = dist_assets_dir.joinpath("js")
 dist_assets_data_dir = dist_assets_dir.joinpath("data")
 dist_posts_dir = dist_dir.joinpath("posts")
 
+# config
 cf_page_proj = "chad-site"
-
+bmc_link = "https://buymeacoffee.com/windriftz"
+working_email = "windriftz.online@gmail.com"
 featured_post_slugs = ["01-welcome-to-site"]
+platforms = [
+    {
+        "name": "github",
+        "link": "",
+    },
+    {
+        "name": "youtube",
+        "link": "",
+    },
+    {
+        "name": "instagram",
+        "link": "",
+    },
+    {
+        "name": "bluesky",
+        "link": "",
+    },
+    {
+        "name": "substack",
+        "link": "",
+    },
+    {
+        "name": "mastodon",
+        "link": "",
+    },
+]
 
 jj2_env = Environment(loader=FileSystemLoader(templates_dir))
+base_render_ctx = {"current_year": datetime.now().year}
 
 
 class NoGivenTemplateException(Exception):
+    pass
+
+
+class PostSlugDuplication(Exception):
     pass
 
 
@@ -69,9 +103,17 @@ def walk_ast(ctx, element):
         alt = element.children[0].children
         url = element.dest
         title = element.title
-        ctx["images"].append(
+        ctx.get("images").append(
             {"url": url, "alt": alt, "title": title, "page_url": ctx["page_url"]}
         )
+    text_blocks = ctx.get("text_blocks")
+    text_blocks_len = len(text_blocks)
+    if isinstance(element, BlockElement):  # noqa: SIM102
+        if text_blocks_len == 0 or text_blocks[-1] != "":
+            text_blocks.append("")
+    if isinstance(element, RawText):  # noqa: SIM102
+        if text_blocks_len > 0 and isinstance(text_blocks[-1], str):
+            text_blocks[-1] += element.children
     if hasattr(element, "children"):
         for child in element.children:
             walk_ast(ctx, child)
@@ -88,67 +130,102 @@ class MyHTMLRenderer(HTMLRenderer):
         return img_html
 
 
-def build(args):
-    base_context = {"current_year": datetime.now().year}
-
+def process_posts(ctx):
     parser = Parser()
     renderer = MyHTMLRenderer()
     post_tpl = jj2_env.get_template("post.html")
-    posts = []
-    posts_map = {}
-    images = []
     for file in posts_dir.iterdir():
+        stat = file.stat()
         post = frontmatter.load(file)
-        if post["draft"]:
+
+        if post.get("draft"):
             continue
-        slug = post["slug"]
+
+        slug = post.get("slug")
+        if slug is None:
+            slug = file.stem
+            post["slug"] = slug
+
+        if slug in ctx.get("posts_map"):
+            raise PostSlugDuplication
+
         order = None
-        try:
-            split = slug.split("-")
-            assert len(split) > 0
+        split = slug.split("-")
+        if len(split) > 0 and split[0].isdigit():
             order = int(split[0])
-        except Exception as e:
-            logger.error(e)
-            continue
         post["order"] = order
-        dist_post_dir = dist_posts_dir.joinpath(slug)
+
         ast = parser.parse(post.content)
-        walk_ast_ctx = {"page_url": f"/posts/{slug}", "images": []}
+        walk_ast_ctx = {
+            "page_url": f"/posts/{slug}",
+            "images": [],
+            "text_blocks": [],
+        }
         walk_ast(walk_ast_ctx, ast)
-        images.extend(walk_ast_ctx["images"])
+
+        ctx.get("images").extend(walk_ast_ctx.get("images"))
+
         html = renderer.render(ast)
-        abstract = " ".join(post.content.split())
-        if "description" in post:
-            abstract = post["description"]
+
+        abstract = post.get("abstract")
+        if abstract is None:
+            abstract = " ".join(walk_ast_ctx.get("text_blocks"))
         post["abstract"] = abstract
-        post["date_fmt"] = post["date"].strftime("%b %d, %Y")
+
+        date = post.get("date")
+        if date is None:
+            created_ts = getattr(stat, "st_birthtime", stat.st_ctime)
+            date = datetime.fromtimestamp(created_ts)
+            post["date"] = date
+        post["date_fmt"] = date.strftime("%b %d, %Y")
+
+        dist_post_dir = dist_posts_dir.joinpath(slug)
         build_page(
             dist_post_dir.joinpath("index.html"),
             template=post_tpl,
             context={
-                **base_context,
+                **base_render_ctx,
                 **post,
                 "post_html": html,
-                "page_title": post["title"],
+                "page_title": post.get("title"),
             },
         )
-        posts.append(post)
-        posts_map[slug] = post
 
-    sorted_posts = sorted(posts, key=lambda p: (-p["order"], -p["date"].toordinal()))
+        ctx.get("posts").append(post)
+        ctx.get("posts_map")[slug] = post
+
+
+def build(args):
+    process_posts_ctx = {"posts": [], "posts_map": {}, "images": []}
+    process_posts(process_posts_ctx)
+
+    sorted_posts = sorted(
+        process_posts_ctx.get("posts"),
+        key=lambda p: (-p.get("order"), -p.get("date").toordinal()),
+    )
 
     build_page(
         dist_posts_dir.joinpath("index.html"),
         template_path="posts.html",
-        context={**base_context, "posts": sorted_posts},
+        context={**base_render_ctx, "posts": sorted_posts},
     )
 
-    featured_posts = [posts_map[slug] for slug in featured_post_slugs]
+    featured_posts = [
+        process_posts_ctx.get("posts_map").get(slug)
+        for slug in featured_post_slugs
+        if slug in process_posts_ctx.get("posts_map")
+    ]
 
     build_page(
         dist_dir.joinpath("index.html"),
         template_path="index.html",
-        context={**base_context, "featured_posts": featured_posts},
+        context={
+            **base_render_ctx,
+            "bmc_link": bmc_link,
+            "working_email": working_email,
+            "featured_posts": featured_posts,
+            "platforms": platforms,
+        },
     )
 
     build_page(
@@ -157,7 +234,7 @@ def build(args):
     )
 
     with ensure_dir_and_open_file(dist_assets_data_dir.joinpath("images.json")) as file:
-        file.write(json.dumps(images))
+        file.write(json.dumps(process_posts_ctx.get("images")))
 
     sass.compile(dirname=(assets_css_dir, dist_assets_css_dir))
     shutil.copytree(assets_images_dir, dist_assets_images_dir, dirs_exist_ok=True)
@@ -188,6 +265,7 @@ def deploy(args):
             return e.returncode
     else:
         logger.info("wrangler not found, falling back to cloudflare SDK deploy.")
+        # TODO: implement this
 
 
 if __name__ == "__main__":
