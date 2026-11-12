@@ -41,7 +41,7 @@ dist_posts_dir = dist_dir.joinpath("posts")
 cf_page_proj = "chad-site"
 bmc_link = "https://buymeacoffee.com/windriftz"
 working_email = "windriftz.online@gmail.com"
-featured_post_slugs = ["01-welcome-to-site"]
+featured_post_slugs = ["01-welcome-to-site", "02-studying-traditional-chinese"]
 platforms = [
     {
         "name": "github",
