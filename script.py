@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 import shutil
 import subprocess
 from contextlib import contextmanager
@@ -11,10 +12,10 @@ import sass
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader
 from loguru import logger
+from marko import Markdown
 from marko.block import BlockElement
-from marko.html_renderer import HTMLRenderer
-from marko.inline import Image, RawText
-from marko.parser import Parser
+from marko.helpers import MarkoExtension
+from marko.inline import Image, InlineElement, RawText
 
 load_dotenv()
 
@@ -99,13 +100,17 @@ def build_page(dest_path, template_path=None, template=None, context=None):
 
 
 def walk_ast(ctx, element):
-    if isinstance(element, Image):
+    if isinstance(element, (Image, ImageWithJsonAttr)):
         alt = element.children[0].children
         url = element.dest
         title = element.title
-        ctx.get("images").append(
-            {"url": url, "alt": alt, "title": title, "page_url": ctx["page_url"]}
-        )
+        no_track = False
+        if isinstance(element, ImageWithJsonAttr) and element.attrs.get("no_track"):
+            no_track = True
+        if not no_track:
+            ctx.get("images").append(
+                {"url": url, "alt": alt, "title": title, "page_url": ctx["page_url"]}
+            )
     text_blocks = ctx.get("text_blocks")
     text_blocks_len = len(text_blocks)
     if isinstance(element, BlockElement):  # noqa: SIM102
@@ -119,7 +124,27 @@ def walk_ast(ctx, element):
             walk_ast(ctx, child)
 
 
-class MyHTMLRenderer(HTMLRenderer):
+class ImageWithJsonAttr(InlineElement):
+    # parse common mark image + json attrs
+    # ex. ![alt](url "title"){"a": "b"}
+    pattern = re.compile(r'!\[(.+)\]\((\S+)(?:\s+"(.+)")?\)(\{.+\})')
+    priority = 6
+    # parse alt
+    parse_children = True
+    parse_group = 1
+
+    def __init__(self, match):
+        self.dest = match.group(2)
+        self.title = match.group(3)
+        raw_attrs = match.group(4)
+        try:
+            self.attrs = json.loads(raw_attrs)
+        except:  # noqa: E722
+            self.attrs = {}
+
+
+class CustomImageRendererMixin:
+    # override render_image to render figure with caption when title is provided
     def render_image(self, element):
         alt = self.render_children(element)
         src = element.dest
@@ -129,10 +154,16 @@ class MyHTMLRenderer(HTMLRenderer):
             return f"<figure>{img_html}<figcaption>{title}</figcaption></figure>"
         return img_html
 
+    # render function for ImageWithJsonAttr
+    def render_image_with_json_attr(self, element):
+        return self.render_image(element)
+
 
 def process_posts(ctx):
-    parser = Parser()
-    renderer = MyHTMLRenderer()
+    mk_ext = MarkoExtension(
+        elements=[ImageWithJsonAttr], renderer_mixins=[CustomImageRendererMixin]
+    )
+    md = Markdown(extensions=[mk_ext])
     post_tpl = jj2_env.get_template("post.html")
     for file in posts_dir.iterdir():
         stat = file.stat()
@@ -155,7 +186,7 @@ def process_posts(ctx):
             order = int(split[0])
         post["order"] = order
 
-        ast = parser.parse(post.content)
+        ast = md.parse(post.content)
         walk_ast_ctx = {
             "page_url": f"/posts/{slug}",
             "images": [],
@@ -165,7 +196,7 @@ def process_posts(ctx):
 
         ctx.get("images").extend(walk_ast_ctx.get("images"))
 
-        html = renderer.render(ast)
+        html = md.convert(post.content)
 
         abstract = post.get("abstract")
         if abstract is None:

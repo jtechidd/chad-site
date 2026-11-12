@@ -1,4 +1,7 @@
 let images = null
+const coverImg = document.querySelector("#cover-img");
+const title = document.querySelector("#cover-img-title");
+const readMore = document.querySelector("#cover-img-read-more-link");
 
 async function roll() {
     if(!images) {
@@ -6,11 +9,17 @@ async function roll() {
         const json = await response.json();
         images = json;
     }
+
+    if(images.length == 0) {
+        readMore.classList.add("hidden");
+        return;
+    }
     const rand = Math.floor(Math.random()*images.length)
     const image = images[rand]
-    document.querySelector("#cover-img").setAttribute("src",image.url)
-    document.querySelector("#cover-img-title").setHTMLUnsafe(image.title ?? image.alt)
-    document.querySelector("#cover-img-read-more-link").setAttribute("href",image.page_url)
+    coverImg.setAttribute("src",image.url)
+    title.setHTMLUnsafe(image.title ?? image.alt)
+    readMore.classList.remove("hidden");
+    readMore.setAttribute("href",image.page_url)
 }
 
 
