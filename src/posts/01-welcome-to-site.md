@@ -5,7 +5,9 @@ tags: []
 draft: false
 short_description: This is where everything started.
 ---
-Thank you for dropping by, no matter how you discovered this website, I truly appreciate it a lot.
+Thank you for dropping by.
+
+No matter how you discovered this website, I truly appreciate it.
 
 I created this website mainly to share my thoughts, works, and projects that I am working on. All contents on this website will not and never be using AI to mindlessly generating. I only use it as a chatbot assistant tool that is so-called a powerful search engine.
 
